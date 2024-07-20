@@ -1,0 +1,153 @@
+1. ROW LEVEL DML TRIGGER
+===========================================================================================================================
+insert into employee (ID, NAME, GENDER, DOB, MOBILE_NUMBER, ADDRESS, IS_ACTIVE, DEPT_ID)
+    values (511, 'Rohit', 'MALE', to_date('2020-01-23','YYYY-MM-DD'), 8965523671, 'Goa', 'TRUE', 5);
+
+
+create or replace trigger my_trigger_2
+before 
+insert or update or delete on employee
+referencing new as n
+for each row 
+enable
+declare
+    deptId number;
+    dept_count number;
+begin
+    case
+        when inserting then
+            deptId := :n.dept_id;
+            select count(*) into dept_count from department where dept_id = deptId;
+            if(dept_count = 0) then
+                insert into department (dept_id) values (deptId);
+            end if;
+        when updating then
+            dbms_output.put_line('Updating Value!');
+        when deleting then
+            dbms_output.put_line('Deleting Value!');
+    end case;
+end;
+
+alter trigger my_trigger_2 disable;
+
+drop trigger my_trigger_2
+===========================================================================================================================
+
+2. STATEMENT LEVEL DML TRIGGER
+===========================================================================================================================
+update employee set address = 'Noida' where id = 102;
+
+create or replace trigger statement_level_trigger
+after 
+insert or update or delete on employee 
+enable
+declare
+    row_affected number;
+begin
+    row_affected := SQL%ROWCOUNT;
+    dbms_output.put_line('rows get affected ' || row_affected);   -- it display number of row affected.
+end;
+===========================================================================================================================
+
+3. DDL TRIGGER
+===========================================================================================================================
+
+set serveroutput on
+create or replace trigger ddl_trigger_2
+before
+drop or truncate 
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin
+     if(user in ('INS')) then
+        insert into ddl_system_log values (sysdate, user, eventType, objectName);
+     else
+        raise_application_error(-20000,user || ' not have permission to perform ' || eventType || ' operation');
+     end if;
+end;
+------------------------------------------------------------------------------------------------------------------------
+create or replace trigger ddl_trigger
+before 
+ddl
+on schema  
+begin 
+    raise_application_error(-20001,'Drop and Truncate cannot perform');
+end;
+------------------------------------------------------------------------------------------------------------------------
+create or replace trigger ddl_trigger_2
+before
+drop or truncate 
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin
+     if(user in ('INS')) then
+        insert into ddl_system_log values (sysdate, user, eventType, objectName);
+     else
+        raise_application_error(-20000,user || ' not have permission to perform ' || eventType || ' operation');
+     end if;
+end;
+===========================================================================================================================
+
+4. DATBASE TRIGGER (LOGON, LOGOFF, STARTUP, SHUTDOWN)
+===========================================================================================================================
+
+create table database_trigger_logs
+(
+    log_time timestamp, 
+    user_name varchar(20), 
+    operation varchar(20), 
+    object_name varchar(20)
+);
+
+
+4.1 LOGON
+---------------------------------------------------------------------------------------------------------------------------
+create or replace trigger database_trigger_logon
+after logon
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin 
+    insert into database_trigger_logs values(sysdate, user, eventType, objectName);
+end;
+
+4.2 LOGOFF
+---------------------------------------------------------------------------------------------------------------------------
+create or replace trigger database_trigger_logoff
+before logoff
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin 
+    insert into database_trigger_logs values(sysdate, user, eventType, objectName);
+end;
+
+4.3 STARTUP
+---------------------------------------------------------------------------------------------------------------------------
+create or replace trigger database_trigger_startup
+after startup
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin 
+    insert into database_trigger_logs values(sysdate, user, eventType, objectName);
+end;
+
+4.4 SHUTDOWN
+---------------------------------------------------------------------------------------------------------------------------
+create or replace trigger database_trigger_shutdown
+before shutdown
+on database
+declare 
+    objectName varchar(20) := ora_dict_obj_name;
+    eventType varchar(20) := ora_sysevent;
+begin 
+    insert into database_trigger_logs values(sysdate, user, eventType, objectName);
+end;
