@@ -1,0 +1,121 @@
+set serveroutput on
+--------------------------------------------------------------------------------
+declare 
+    var1 number := 0;
+begin
+    loop
+        if var1 = 10 then
+            exit;
+        end if;
+        dbms_output.put_line('Value is '|| var1);
+        var1 := var1 + 1;
+    end loop;
+end;
+--------------------------------------------------------------------------------
+--- FOR LOOP
+begin 
+    for var2 in 1..5 loop
+         dbms_output.put_line('Value is '|| var2);
+    end loop;
+end;
+--------------------------------------------------------------------------------
+create or replace procedure proc_fetch_emp_details(emp_id in number, emp_name out varchar, emp_age out number)
+as    
+begin
+    select name, age into emp_name, emp_age from employee where id = emp_id;
+end;
+
+declare 
+    emp_name varchar(20);
+    emp_age number;
+begin
+    proc_fetch_emp_details(101, emp_name, emp_age);
+    dbms_output.put_line(emp_name || ' ' ||emp_age);
+end;
+--------------------------------------------------------------------------------
+create or replace procedure proc_fetch_emp_details_by_dept_id(depart_id in number)
+as
+    emp_name varchar(20);
+    emp_age number;
+    cursor emp_cursor is select name, age from employee where dept_id = depart_id;
+begin
+    open emp_cursor;
+        loop
+            fetch emp_cursor into emp_name, emp_age;
+            exit when emp_cursor%notfound;
+            dbms_output.put_line(emp_name || ' ' ||emp_age);
+        end loop;
+    close emp_cursor;
+end;
+
+declare 
+    emp_name varchar(20);
+    emp_age number;
+begin
+    proc_fetch_emp_details_by_dept_id(1,emp_name,emp_age);
+    --dbms_output.put_line(emp_name || ' ' ||emp_age);
+end;
+--------------------------------------------------------------------------------
+create or replace procedure proc_fetch_emp_details_by_dept_id(depart_id in number, ref_emp_data out sys_refcursor)
+as
+begin
+    open ref_emp_data for select name, age from employee where dept_id = depart_id;
+end;
+
+declare 
+    curr sys_refcursor;
+    emp_name varchar(20);
+    emp_age number;
+begin
+    proc_fetch_emp_details_by_dept_id(3,curr);
+    loop
+        fetch curr into emp_name, emp_age;
+        exit when curr%notfound;
+        dbms_output.put_line(emp_name || ' ' ||emp_age);
+    end loop;
+end;
+--------------------------------------------------------------------------------
+create or replace procedure proc_fetch_data(emp_id in number, emp_data out employee%rowtype)
+as
+begin 
+    select * into emp_data from employee where id = emp_id;
+end;
+
+declare 
+    emp_data employee%rowtype;
+begin 
+    proc_fetch_data(101,emp_data);
+    dbms_output.put_line(emp_data.age);
+end;
+--------------------------------------------------------------------------------
+create or replace procedure fetch_emp_details(emp_id in number, ref_emp_data out sys_refcursor)
+as
+begin
+    open ref_emp_data for select * from employee where id = emp_id;
+end;
+
+declare
+    cur sys_refcursor;
+begin 
+    fetch_emp_details(101, cur);
+    dbms_output.put_line(cur.name);
+end;
+--------------------------------------------------------------------------------
+create or replace procedure get_multi_emp(depart_id in number)
+as
+    type xx_ref_cur is ref cursor;
+    c_ref xx_ref_cur;
+begin
+    open c_ref for select name, age from employee where dept_id = depart_id;
+        loop 
+            fetch c_ref into ref_emp_data;
+            exit when c_ref%notfound;
+        end loop;
+    close c_ref;
+end;
+
+declare 
+    c sys_refcursor;
+begin 
+get_multi_emp(3,c);
+end;
