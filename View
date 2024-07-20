@@ -1,0 +1,49 @@
+select * from  employee;
+
+create view employee_view as  select id,name,age from employee;
+
+select * from employee_view
+
+update employee_view set name = 'Pinal' where id = 14
+
+create or replace view employee_view as select id,name,age from employee where age < 25 with read only;
+
+insert into employee_view (id,name,age) values (102,'Tina',22);
+
+delete from employee_view where id = 101;
+
+alter view employee_view read only ## READ ONLY VIEW
+
+=================================================================================================================
+
+create table department(
+    dept_id int primary key,
+    dept_name varchar(20)
+);
+
+insert into department (dept_id, dept_name) values (1, 'IT');
+insert into department (dept_id, dept_name) values (2, 'Account');
+insert into department (dept_id, dept_name) values (3, 'Finance');
+
+select * from department;
+
+alter table employee add dept_id int;
+
+select * from employee;
+
+alter table employee add constraint fk_emp_dept foreign key(dept_id) references department(dept_id); 
+
+update employee set dept_id = 2 where id = 102
+update employee set dept_id = 2 where id = 13
+update employee set dept_id = 1 where id = 14
+
+select e.id, e.name,e.age, d.dept_name from employee e inner join department d on e.dept_id = d.dept_id 
+
+create view emp_dept as select e.id, e.name,e.age, d.dept_name from employee e inner join department d on e.dept_id = d.dept_id 
+
+select * from emp_dept
+
+insert into emp_dept (id, name,age,dept_name) values (103,'Pinky',25,'Account');
+update emp_dept set dept_name = 'Account' where id = 102 
+
+delete from emp_dept where dept_name = 'Account'
