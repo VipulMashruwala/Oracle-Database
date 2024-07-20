@@ -1,0 +1,85 @@
+TRIGGER
+======================================================================================================
+Q=> When you try to delete insertrd value using trigger on particular table.
+
+Error starting at line : 8 in command -
+insert into employee (ID, NAME, GENDER, DOB, MOBILE_NUMBER, ADDRESS, IS_ACTIVE, DEPT_ID)
+    values (211, 'Rohit', 'MALE', to_date('2020-01-23','YYYY-MM-DD'), 8965523671, 'Goa', 'TRUE', 3)
+Error at Command Line : 8 Column : 13
+Error report -
+SQL Error: ORA-04091: table VM.EMPLOYEE is mutating, trigger/function may not see it
+ORA-06512: at "VM.MY_TRIGGER_2", line 2
+ORA-04088: error during execution of trigger 'VM.MY_TRIGGER_2'
+04091. 00000 -  "table %s.%s is mutating, trigger/function may not see it"
+*Cause:    A trigger (or a user defined plsql function that is referenced in
+           this statement) attempted to look at (or modify) a table that was
+           in the middle of being modified by the statement which fired it.
+*Action:   Rewrite the trigger (or function) so it does not read that table.
+
+Resolution:
+
+The specific error occurs because Oracle does not allow a trigger to query or modify the same table that caused the trigger to fire. This is known as the "mutating table" error.
+
+When you perform an insert on the employee table, and then your AFTER INSERT trigger tries to delete from the employee table, Oracle raises the ORA-04091 error because it detects that the table is being modified while it is still in the middle of an insert operation. This is to prevent inconsistent data states and maintain data integrity.
+=========================================================================================================
+
+Troubleshooting Query (To startup and shutdown database)
+=========================================================================================================
+
+Microsoft Windows [Version 10.0.19045.4529]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\HP>sqlplus / as sysdba
+
+SQL*Plus: Release 21.0.0.0.0 - Production on Sat Jul 13 15:43:43 2024
+Version 21.3.0.0.0
+
+Copyright (c) 1982, 2021, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 21c Enterprise Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> startup;
+ORACLE instance started.
+
+Total System Global Area 2483026528 bytes
+Fixed Size                  9857632 bytes
+Variable Size             989855744 bytes
+Database Buffers         1476395008 bytes
+Redo Buffers                6918144 bytes
+Database mounted.
+Database opened.
+SQL> alter database open;
+alter database open
+*
+ERROR at line 1:
+ORA-01531: a database already open by the instance
+
+
+SQL> show pdbs;
+
+    CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+         2 PDB$SEED                       READ ONLY  NO
+         3 ORCLPDB                        MOUNTED
+SQL> alter pluggable database orclpdb open;
+
+Pluggable database altered.
+
+Additional Note:
+
+STARTUP NOMOUNT: Starts the instance without mounting the database. Useful for certain recovery operations.
+STARTUP MOUNT: Starts the instance and mounts the database but does not open it. This mode is useful for certain maintenance tasks.
+STARTUP OPEN: This is the default if no other option is specified. It starts the instance, mounts the database, and opens it.
+
+SHUTDOWN NORMAL: Waits for all connected users to disconnect before shutting down.
+SHUTDOWN IMMEDIATE: Disconnects all connected users immediately and rolls back active transactions. This is commonly used for a quick, clean shutdown.
+SHUTDOWN TRANSACTIONAL: Waits for all transactions to complete before shutting down.
+SHUTDOWN ABORT: Forces an immediate shutdown without waiting for users to disconnect or transactions to complete. This should be used only when necessary, as it can lead to a need for recovery on the next startup.
+=========================================================================================================
