@@ -4,16 +4,13 @@ create view employee_view as  select id,name,age from employee;
 
 select * from employee_view
 
-update employee_view set name = 'Pinal' where id = 14
+update employee_view set name = 'Kumar' where id = 14
 
 create or replace view employee_view as select id,name,age from employee where age < 25 with read only;
 
 insert into employee_view (id,name,age) values (102,'Tina',22);
 
 delete from employee_view where id = 101;
-
-alter view employee_view read only ## READ ONLY VIEW
-
 =================================================================================================================
 
 create table department(
