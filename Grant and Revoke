@@ -1,0 +1,52 @@
+ALTER SESSION SET CONTAINER = orclpdb;
+CREATE USER ins IDENTIFIED BY ins123;
+
+
+GRANT
+--- ---------------------------------
+grant connect, resource to ins
+grant resource to ins
+grant create table to ins
+ALTER USER ins QUOTA 100M ON USERS;
+grant insert on ins.employee to ins
+grant insert on fruits to ins
+grant update on fruits to ins
+grant delete on fruits to ins
+grant select on sys.fruit_name to ins
+grant connect to ins
+grant insert on fruits to vm
+--------------------------------------
+
+REVOKE
+-------------------------------------
+revoke insert on fruits from ins
+revoke all on ins.employee from ins
+revoke resource from ins
+revoke connect from ins
+
+
+REVOKE CREATE TABLE FROM ins;
+----------------------------------------
+create table fruits(
+    id int,
+    name varchar(20)
+)
+
+select * from fruits
+--------------------------------------------
+create view fruit_name as select name from fruits;
+
+SELECT * FROM DBA_ROLE_PRIVS where grantee = 'INS'
+
+select * from ALL_TABLES where owner = 'INS'
+---------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
