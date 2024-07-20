@@ -1,6 +1,6 @@
 TRIGGER
 ======================================================================================================
-Q=> When you try to delete insertrd value using trigger on particular table.
+Q1 => When you try to delete insertrd value using trigger on particular table.
 
 Error starting at line : 8 in command -
 insert into employee (ID, NAME, GENDER, DOB, MOBILE_NUMBER, ADDRESS, IS_ACTIVE, DEPT_ID)
@@ -83,3 +83,14 @@ SHUTDOWN IMMEDIATE: Disconnects all connected users immediately and rolls back a
 SHUTDOWN TRANSACTIONAL: Waits for all transactions to complete before shutting down.
 SHUTDOWN ABORT: Forces an immediate shutdown without waiting for users to disconnect or transactions to complete. This should be used only when necessary, as it can lead to a need for recovery on the next startup.
 =========================================================================================================
+Q2 => Different between DML Operation over table and views..
+
+https://chatgpt.com/c/8dfc3bbe-2556-4f8e-bf4b-6d2d9a1e60cf
+=========================================================================================================
+
+select * from all_triggers where table_name = 'EMPLOYEE'  -- display triggers data
+
+Notes Link: https://www.oreilly.com/library/view/oracle-plsql-programming/9780596805401/ch19s03.html
+
+
+
