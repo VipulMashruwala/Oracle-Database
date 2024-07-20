@@ -1,0 +1,49 @@
+create or replace function get_city_name_by_id(num in number)
+return varchar
+as
+    city_name varchar(20);
+begin
+    select name into city_name from ins.city where id = num;
+    return city_name;
+end;
+
+begin
+    dbms_output.put_line('City Name is ' || get_city_name_by_id(3));
+end;
+--------------------------------------------------------------------------------
+
+create or replace function delete_city_by_id(city_id in number)
+return number
+as
+begin
+    delete from ins.city where id = city_id;
+    return sql%rowcount;
+end;
+
+select * from ins.city;
+begin 
+     dbms_output.put_line('Row Affected ' || delete_city_by_id(1));
+end;
+--------------------------------------------------------------------------------
+
+create or replace function get_phone_by_id(emp_id in number)
+return varchar
+as
+    phone varchar(20);
+begin
+    select mobile_number into phone from employee where id = emp_id and is_active = 'TRUE';
+    return phone;
+end;
+
+create or replace procedure proc_employee_details(emp_id in number, phone_number out varchar)
+as
+begin
+    select get_phone_by_id(emp_id) into phone_number from dual;
+end;
+
+declare 
+    phone varchar(20);
+begin 
+    proc_employee_details(12,phone);
+    dbms_output.put_line('Phone Number is ' || phone);
+end;
