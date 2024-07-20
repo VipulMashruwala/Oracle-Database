@@ -1,0 +1,152 @@
+select * from user_tab_privs -- used to know the premission.
+
+------------------------------------------------------------
+
+select sysdate from dual
+select 'Ajay' || 'Kumar' from dual
+select id || ' ' || name from ins.city
+
+define name = 'Delhi';
+select * from ins.city where name = '&name'
+
+------------------------------------------------------------
+set serveroutput on
+begin
+dbms_output.put_line('Hi Vipul');
+end;
+
+-------------------------------------------------------------
+declare 
+var1 number;
+begin
+var1 := 10;
+dbms_output.put_line('Number is ' || var1);
+end;
+
+-------------------------------------------------------------
+
+declare 
+    num1 number;
+    num2 number;
+    total number;
+begin
+    num1 := 10;
+    num2 := 20;
+    total := num1 + num2;
+    dbms_output.put_line('Addition is ' || total);
+end;
+
+---------------------------------------------------------------
+
+declare 
+    city_name varchar(20);
+begin
+    select name into city_name from ins.city where id = 3;
+    dbms_output.put_line('City Name is ' || city_name);
+end;
+
+----------------------------------------------------------------
+
+create or replace procedure proc_fetch_city_name(num in number, city_name out varchar)
+as
+begin 
+    select name into city_name from ins.city where id = num;
+end;
+
+declare 
+    a number;
+    b varchar(20);
+begin
+    a := 2;
+    proc_fetch_city_name(a,b);
+    dbms_output.put_line('City Name is ' || b);
+end;
+
+--------------------------------------------------------------------------------
+declare 
+    age number;
+begin
+    age := 17;
+    if age >= 18 then
+        dbms_output.put_line('You can vote');
+    else
+        dbms_output.put_line('You cannot vote');
+    end if;
+end;
+--------------------------------------------------------------------------------
+create or replace function get_age_from_dob(dob in date)
+return number
+as
+    age number;
+    monthDiff number;
+    yearDiff number;
+    dayDiff number;
+begin
+     monthDiff := extract(month from sysdate) - extract(month from dob);
+     yearDiff := extract(year from sysdate) - extract(year from dob);
+     dayDiff := extract(day from sysdate) - extract(day from dob);
+     if (monthDiff < 0 or (monthDiff = 0 and dayDiff < 0))
+         then
+            age := yearDiff - 1;
+     else
+            age := yearDiff;
+     end if;
+    return age;
+end;
+
+----------------------------------------------------------------------------------
+
+PROCEDURE AND FUNCTION EXAMPLE
+-----------------------------------------------------------
+create or replace procedure add_employee_data(
+emp_id in number,
+emp_name in varchar,
+emp_gender in varchar,
+emp_dob in date,
+emp_mobile_number in varchar,
+emp_address in varchar,
+emp_is_active in varchar,
+emp_dept_id in number,
+message out varchar2
+)
+as
+    emp_age number;
+    ex_upper_case_char exception;
+begin
+    if(emp_id is null) then
+        message := 'Employee ID is required!';
+        return;
+    end if;
+
+    if(emp_name is null) then
+        message := 'Employee Name is required!';
+        return;
+    end if;
+
+    if(emp_is_active <> 'TRUE' or emp_is_active <> 'FALSE') then
+        raise ex_upper_case_char;
+        return;
+    end if;
+
+    emp_age := get_age_from_dob(emp_dob);
+    insert into employee (ID, NAME, GENDER, DOB, MOBILE_NUMBER, ADDRESS, IS_ACTIVE, DEPT_ID, AGE, CANDIDATE_TYPE)
+    values (emp_id, emp_name, emp_gender, emp_dob, emp_mobile_number, emp_address, emp_is_active, emp_dept_id, emp_age,
+           case 
+               when emp_age between 0  and 4 then 'Baby'
+               when emp_age between 5 and 9 then 'Child'
+               when emp_age between 10  and 14 then 'Adult'
+               else 'Senior'
+            end);
+    message := 'Employee Details Added Successfully!';
+
+    exception 
+        when dup_val_on_index then
+            message := 'Employee with Id: ' || emp_id || ' already exist!';
+        when  value_error then
+            message := 'Error occurred while data type conversion!';
+        when ex_upper_case_char then
+            message := 'Character must be in upper case!';
+        when others then
+            message := sqlerrm;
+end add_employee_data;
+
