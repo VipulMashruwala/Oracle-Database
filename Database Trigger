@@ -157,6 +157,20 @@ end;
 
 5. INSTEAD OF TRIGGER (APPLY ON VIEW)
 ===========================================================================================================================
+select * from emp_dept 
+
+select * from employee;
+
+select * from department;
+
+insert into emp_dept values(5510, 'Pulkit', 45, 'Account');
+
+update emp_dept set dept_name = 'Account' where id = 101;
+
+update department set dept_name = 'IT' where dept_id = 5;
+
+delete from emp_dept where dept_name = 'IT';
+
 create or replace trigger emp_dept_view_trigger
 instead of insert or update or delete 
 on emp_dept
