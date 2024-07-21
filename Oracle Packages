@@ -94,3 +94,5 @@ create or replace package body my_project_pkg as
         return age;
     end get_age_from_dob;
 end my_project_pkg;
+
+Notes Link:  https://chatgpt.com/c/ed398292-974e-4c50-9b96-2020bd06e00d
