@@ -146,8 +146,36 @@ create or replace trigger database_trigger_shutdown
 before shutdown
 on database
 declare 
+
+
     objectName varchar(20) := ora_dict_obj_name;
     eventType varchar(20) := ora_sysevent;
 begin 
     insert into database_trigger_logs values(sysdate, user, eventType, objectName);
+end;
+===========================================================================================================================
+
+5. INSTEAD OF TRIGGER (APPLY ON VIEW)
+===========================================================================================================================
+create or replace trigger emp_dept_view_trigger
+instead of insert or update or delete 
+on emp_dept
+referencing new as n old as o
+for each row
+declare
+    deptId number;
+begin
+    case
+        when inserting then 
+            select dept_id into deptId from department where dept_name = :n.dept_name;
+            insert into employee (id, name, age, dept_id) values (:n.id, :n.name, :n.age, deptId);
+        when updating then
+            update employee set dept_id = (select dept_id from department where dept_name = :n.dept_name) where id = :o.id;
+        when deleting then
+            -- Deleting based on department name
+            select dept_id into deptId from department where dept_name = :o.dept_name;
+            delete from employee where dept_id = deptId;
+            delete from department where dept_name = :o.dept_name and 
+            not exists(select 1 from employee where dept_id = deptId);
+    end case;
 end;
