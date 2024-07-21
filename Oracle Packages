@@ -1,0 +1,96 @@
+PACKAGES
+=====================================================================================================
+create or replace package my_project_pkg as
+    procedure add_employee_data(
+                                emp_id in number,
+                                emp_name in varchar,
+                                emp_gender in varchar,
+                                emp_dob in date,
+                                emp_mobile_number in varchar,
+                                emp_address in varchar,
+                                emp_is_active in varchar,
+                                emp_dept_id in number,
+                                message out varchar2
+                                );
+                                
+    function get_age_from_dob(dob in date) return number;
+end my_project_pkg;
+
+
+create or replace package body my_project_pkg as
+    procedure add_employee_data(
+    emp_id in number,
+    emp_name in varchar,
+    emp_gender in varchar,
+    emp_dob in date,
+    emp_mobile_number in varchar,
+    emp_address in varchar,
+    emp_is_active in varchar,
+    emp_dept_id in number,
+    message out varchar2
+    )
+    as
+        emp_age number;
+        ex_upper_case_char exception;
+    begin
+        if(emp_id is null) then
+            message := 'Employee ID is required!';
+            return;
+        end if;
+    
+        if(emp_name is null) then
+            message := 'Employee Name is required!';
+            return;
+        end if;
+    
+        if(emp_is_active not in ('TRUE', 'FALSE')) then
+            raise ex_upper_case_char;
+            return;
+        end if;
+    
+        emp_age := get_age_from_dob(emp_dob);
+        insert into employee (ID, NAME, GENDER, DOB, MOBILE_NUMBER, ADDRESS, IS_ACTIVE, DEPT_ID, AGE, CANDIDATE_TYPE)
+        values (emp_id, emp_name, emp_gender, emp_dob, emp_mobile_number, emp_address, emp_is_active, emp_dept_id, emp_age,
+               case 
+                   when emp_age between 0  and 4 then 'Baby'
+                   when emp_age between 5 and 9 then 'Child'
+                   when emp_age between 10  and 14 then 'Adult'
+                   else 'Senior'
+                end);
+        message := 'Employee Details Added Successfully!';
+    
+        exception 
+            when dup_val_on_index then
+                message := 'Employee with Id: ' || emp_id || ' already exist!';
+            when  value_error then
+                message := 'Error occurred while data type conversion!';
+            when ex_upper_case_char then
+                message := 'Character must be in upper case!';
+            when others then
+                message := sqlerrm;
+    end add_employee_data;
+    
+    function get_age_from_dob(dob in date)
+    return number
+    as
+        age number;
+        monthDiff number;
+        yearDiff number;
+        dayDiff number;
+    begin
+         if(dob is null) then
+            return -1;
+         end if;
+         
+         monthDiff := extract(month from sysdate) - extract(month from dob);
+         yearDiff := extract(year from sysdate) - extract(year from dob);
+         dayDiff := extract(day from sysdate) - extract(day from dob);
+         if (monthDiff < 0 or (monthDiff = 0 and dayDiff < 0))
+             then
+                age := yearDiff - 1;
+         else
+                age := yearDiff;
+         end if;
+        return age;
+    end get_age_from_dob;
+end my_project_pkg;
