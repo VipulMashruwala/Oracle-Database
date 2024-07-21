@@ -193,3 +193,5 @@ begin
             not exists(select 1 from employee where dept_id = deptId);
     end case;
 end;
+
+Notes Link:  https://chatgpt.com/c/8dfc3bbe-2556-4f8e-bf4b-6d2d9a1e60cf
